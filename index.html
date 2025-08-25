@@ -28,6 +28,22 @@
     .fullscreen-comparison {width:100%;height:100%;position:relative;}
     .fullscreen-comparison .image-container {height:100%;padding-bottom:0;}
     .close-fullscreen {position:absolute;top:20px;right:20px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;}
+    
+    /* Zoom effect */
+    .zoom-btn {
+      background-color: #3498db;
+      color: white;
+      padding: 5px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .image-container.zoomed {
+      transform: scale(2); /* 放大效果 */
+      transform-origin: center;
+    }
+    
     @media(max-width:768px){.comparison-item{flex:1 1 100%;}}
   </style>
 </head>
@@ -55,37 +71,37 @@
 </div>
 
 <script>
-const MAX_GROUPS=100;
-const FORMATS=["png","jpg","webp"];
-const BASE_PATH="images";
+const MAX_GROUPS = 100;
+const FORMATS = ["png", "jpg", "webp"];
+const BASE_PATH = "images";
 
 // 检查图片是否存在
-function checkImageExists(url){
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>res(true);
-    img.onerror=()=>res(false);
-    img.src=url+"?t="+Date.now();
-    setTimeout(()=>res(false),3000);
+function checkImageExists(url) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => res(true);
+    img.onerror = () => res(false);
+    img.src = url + "?t=" + Date.now();
+    setTimeout(() => res(false), 3000);
   });
 }
 
 // 自动检测多组
-async function detectGroups(){
-  const results=[];
-  for(let i=0;i<MAX_GROUPS;i++){
-    const id=i.toString().padStart(2,"0");
-    let beforeUrl=null,afterUrl=null;
-    for(const ext of FORMATS){
-      const b=`${BASE_PATH}/${id}/before.${ext}`;
-      const a=`${BASE_PATH}/${id}/after.${ext}`;
-      const be=await checkImageExists(b);
-      const ae=await checkImageExists(a);
-      if(be && ae){beforeUrl=b;afterUrl=a;break;}
+async function detectGroups() {
+  const results = [];
+  for (let i = 0; i < MAX_GROUPS; i++) {
+    const id = i.toString().padStart(2, "0");
+    let beforeUrl = null, afterUrl = null;
+    for (const ext of FORMATS) {
+      const b = `${BASE_PATH}/${id}/before.${ext}`;
+      const a = `${BASE_PATH}/${id}/after.${ext}`;
+      const be = await checkImageExists(b);
+      const ae = await checkImageExists(a);
+      if (be && ae) { beforeUrl = b; afterUrl = a; break; }
     }
-    if(beforeUrl && afterUrl){
-      results.push({id,before:beforeUrl,after:afterUrl});
-    }else{
+    if (beforeUrl && afterUrl) {
+      results.push({ id, before: beforeUrl, after: afterUrl });
+    } else {
       break; // 停止在第一个缺失的组
     }
   }
@@ -93,13 +109,15 @@ async function detectGroups(){
 }
 
 // 生成对比项
-function createComparisonItem(group){
-  const item=document.createElement("div");
-  item.className="comparison-item";item.dataset.groupId=group.id;
-  item.innerHTML=`
+function createComparisonItem(group) {
+  const item = document.createElement("div");
+  item.className = "comparison-item";
+  item.dataset.groupId = group.id;
+  item.innerHTML = `
     <div class="comparison-header">
       <div>对比组 ${group.id}</div>
       <button class="fullscreen-btn" title="全屏"><i class="fas fa-expand"></i></button>
+      <button class="zoom-btn" title="放大"><i class="fas fa-search-plus"></i></button>
     </div>
     <div class="image-comparison">
       <div class="image-container">
@@ -113,69 +131,79 @@ function createComparisonItem(group){
       <span class="after-label">After</span>
     </div>
   `;
+  
+  // 放大功能
+  item.querySelector(".zoom-btn").addEventListener("click", () => toggleZoom(item));
+  
   return item;
 }
 
-// 初始化滑块
-function initSlider(item){
-  const beforeImg=item.querySelector(".image-before");
-  const slider=item.querySelector(".slider");
-  const container=item.querySelector(".image-container");
-  let isDragging=false,percent=50,rafId=null;
+// 切换放大效果
+function toggleZoom(item) {
+  const imageContainer = item.querySelector(".image-container");
+  imageContainer.classList.toggle("zoomed");
+}
 
-  function update(p){
-    beforeImg.style.clipPath=`inset(0 ${100-p}% 0 0)`;
-    slider.style.left=p+"%";
+// 初始化滑块
+function initSlider(item) {
+  const beforeImg = item.querySelector(".image-before");
+  const slider = item.querySelector(".slider");
+  const container = item.querySelector(".image-container");
+  let isDragging = false, percent = 50, rafId = null;
+
+  function update(p) {
+    beforeImg.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+    slider.style.left = p + "%";
   }
   update(percent);
 
-  function moveHandler(x){
-    const rect=container.getBoundingClientRect();
-    let p=((x-rect.left)/rect.width)*100;
-    p=Math.max(0,Math.min(100,p));percent=p;
-    if(!rafId){
-      rafId=requestAnimationFrame(()=>{update(percent);rafId=null;});
+  function moveHandler(x) {
+    const rect = container.getBoundingClientRect();
+    let p = ((x - rect.left) / rect.width) * 100;
+    p = Math.max(0, Math.min(100, p)); percent = p;
+    if (!rafId) {
+      rafId = requestAnimationFrame(() => { update(percent); rafId = null; });
     }
   }
-  slider.addEventListener("mousedown",e=>{isDragging=true;e.preventDefault();});
-  window.addEventListener("mouseup",()=>isDragging=false);
-  window.addEventListener("mousemove",e=>{if(isDragging)moveHandler(e.clientX);});
-  slider.addEventListener("touchstart",e=>{isDragging=true;e.preventDefault();});
-  window.addEventListener("touchend",()=>isDragging=false);
-  window.addEventListener("touchmove",e=>{if(isDragging)moveHandler(e.touches[0].clientX);});
+  slider.addEventListener("mousedown", e => { isDragging = true; e.preventDefault(); });
+  window.addEventListener("mouseup", () => isDragging = false);
+  window.addEventListener("mousemove", e => { if (isDragging) moveHandler(e.clientX); });
+  slider.addEventListener("touchstart", e => { isDragging = true; e.preventDefault(); });
+  window.addEventListener("touchend", () => isDragging = false);
+  window.addEventListener("touchmove", e => { if (isDragging) moveHandler(e.touches[0].clientX); });
 }
 
-// 全屏
-function openFullscreen(item){
-  const fs=document.getElementById("fullscreenMode");
-  const before=fs.querySelector(".image-before");
-  const after=fs.querySelector(".image-after");
-  const originalBefore=item.querySelector(".image-before").src;
-  const originalAfter=item.querySelector(".image-after").src;
-  before.src=originalBefore;after.src=originalAfter;
-  fs.style.display="flex";document.body.style.overflow="hidden";
+// 全屏功能
+function openFullscreen(item) {
+  const fs = document.getElementById("fullscreenMode");
+  const before = fs.querySelector(".image-before");
+  const after = fs.querySelector(".image-after");
+  const originalBefore = item.querySelector(".image-before").src;
+  const originalAfter = item.querySelector(".image-after").src;
+  before.src = originalBefore; after.src = originalAfter;
+  fs.style.display = "flex"; document.body.style.overflow = "hidden";
   initSlider(fs);
 }
 
 // 初始化全部
-async function initAll(){
-  const container=document.getElementById("comparisonContainer");
-  const groups=await detectGroups();
-  groups.forEach(g=>{
-    const item=createComparisonItem(g);
+async function initAll() {
+  const container = document.getElementById("comparisonContainer");
+  const groups = await detectGroups();
+  groups.forEach(g => {
+    const item = createComparisonItem(g);
     container.appendChild(item);
     initSlider(item);
-    item.querySelector(".fullscreen-btn")
-      .addEventListener("click",()=>openFullscreen(item));
+    item.querySelector(".fullscreen-btn").addEventListener("click", () => openFullscreen(item));
   });
 }
 
-document.querySelector(".close-fullscreen").addEventListener("click",()=>{
-  const fs=document.getElementById("fullscreenMode");
-  fs.style.display="none";document.body.style.overflow="auto";
+document.querySelector(".close-fullscreen").addEventListener("click", () => {
+  const fs = document.getElementById("fullscreenMode");
+  fs.style.display = "none"; document.body.style.overflow = "auto";
 });
-document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){document.querySelector(".close-fullscreen").click();}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { document.querySelector(".close-fullscreen").click(); }
 });
 
 initAll();
