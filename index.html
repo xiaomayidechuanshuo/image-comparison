@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub图片显示问题修复版</title>
+    <title>GitHub图片对比查看器</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -397,6 +397,31 @@
             background: #c82333;
         }
         
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 18px;
+            color: #3498db;
+        }
+        
+        .loading i {
+            margin-right: 10px;
+            animation: spin 1s infinite linear;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #ffcccc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            color: #d32f2f;
+        }
+        
         @media (max-width: 768px) {
             .comparison-item {
                 flex: 1 1 100%;
@@ -412,82 +437,27 @@
 <body>
     <div class="container">
         <header>
-            <h1>GitHub图片显示问题修复版</h1>
-            <p class="description">已优化图片路径处理，解决GitHub Pages图片加载问题</p>
+            <h1>GitHub图片对比查看器</h1>
+            <p class="description">动态加载GitHub仓库中的图片对比组</p>
         </header>
         
         <div class="alert">
             <h3><i class="fas fa-exclamation-triangle"></i> GitHub图片显示问题解决方案</h3>
-            <p>如果您的图片在GitHub上无法显示，请检查以下事项：</p>
-            <ol>
-                <li>确保图片已上传到您的GitHub仓库</li>
-                <li>使用正确的相对路径（如：<code>images/your-image.jpg</code>）</li>
-                <li>GitHub Pages可能需要几分钟才能更新内容</li>
-                <li>尝试在浏览器中按Ctrl+F5强制刷新</li>
-            </ol>
+            <p>本页面使用raw.githubusercontent.com域名加载图片，确保GitHub Pages能正确显示图片。</p>
+            <p>图片路径格式: <code>https://raw.githubusercontent.com/用户名/仓库名/main/images/组号/before.png</code></p>
             <button class="debug-btn" id="debugBtn">
                 <i class="fas fa-bug"></i> 调试图片路径
             </button>
         </div>
         
-        <div class="comparison-container">
-            <div class="comparison-item">
-                <div class="comparison-header">
-                    <div class="comparison-title">设计对比 (PNG支持)</div>
-                    <div class="comparison-controls">
-                        <button class="control-btn fullscreen-btn" title="全屏查看">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="image-comparison">
-                    <div class="image-container">
-                        <img class="image-after" src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80" alt="设计后" onerror="handleImageError(this, 'after')">
-                        <div class="image-before">
-                            <img src="https://images.unsplash.com/photo-1561070791-36c11767b26a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80" alt="设计前" onerror="handleImageError(this, 'before')">
-                        </div>
-                        <div class="slider">
-                            <div class="slider-handle"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-input">
-                    <input type="range" min="0" max="100" value="50" class="slider-control">
-                </div>
-                <div class="image-caption">
-                    <span class="before-label">设计前</span>
-                    <span class="after-label">设计后</span>
-                </div>
-            </div>
-            
-            <div class="comparison-item">
-                <div class="comparison-header">
-                    <div class="comparison-title">界面对比 (PNG支持)</div>
-                    <div class="comparison-controls">
-                        <button class="control-btn fullscreen-btn" title="全屏查看">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="image-comparison">
-                    <div class="image-container">
-                        <img class="image-after" src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="新版界面" onerror="handleImageError(this, 'after')">
-                        <div class="image-before">
-                            <img src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="旧版界面" onerror="handleImageError(this, 'before')">
-                        </div>
-                        <div class="slider">
-                            <div class="slider-handle"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-input">
-                    <input type="range" min="0" max="100" value="50" class="slider-control">
-                </div>
-                <div class="image-caption">
-                    <span class="before-label">旧版界面</span>
-                    <span class="after-label">新版界面</span>
-                </div>
-            </div>
+        <div id="loadingIndicator" class="loading">
+            <i class="fas fa-spinner"></i> 正在检测图片组，请稍候...
+        </div>
+        
+        <div id="errorContainer" style="display: none;"></div>
+        
+        <div class="comparison-container" id="comparisonContainer">
+            <!-- 动态生成的图片对比项将在这里显示 -->
         </div>
         
         <div class="faq-section">
@@ -521,42 +491,19 @@
 your-repository/
 ├── index.html
 ├── images/
-│   ├── design/
+│   ├── 00/
 │   │   ├── before.png
 │   │   └── after.png
-│   └── interface/
-│       ├── before.jpg
-│       └── after.jpg
+│   ├── 01/
+│   │   ├── before.png
+│   │   └── after.png
+│   └── 02/
+│       ├── before.png
+│       └── after.png
 └── README.md
                     </div>
                     
-                    <p>在HTML中引用图片时，使用相对路径：</p>
-                    <div class="folder-structure">
-&lt;img class="image-after" src="images/design/after.png" alt="设计后"&gt;
-&lt;img src="images/design/before.png" alt="设计前"&gt;
-                    </div>
-                    
-                    <p>如果您的HTML文件在子文件夹中，需要调整路径：</p>
-                    <div class="folder-structure">
-&lt;img class="image-after" src="../images/design/after.png" alt="设计后"&gt;
-&lt;img src="../images/design/before.png" alt="设计前"&gt;
-                    </div>
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question">
-                    <i class="fas fa-question-circle"></i>
-                    <span>解决缓存问题</span>
-                </div>
-                <div class="faq-answer">
-                    <p>如果图片已更新但浏览器仍显示旧图片，可以尝试以下方法：</p>
-                    <ol>
-                        <li>在GitHub上更新图片后，等待几分钟让更改生效</li>
-                        <li>在浏览器中按Ctrl+F5强制刷新页面</li>
-                        <li>可以在图片URL后添加随机参数来避免缓存：<code>images/your-image.png?v=2</code></li>
-                        <li>清除浏览器缓存</li>
-                    </ol>
+                    <p>本页面会自动检测从00开始的图片组，直到找不到图片为止。</p>
                 </div>
             </div>
         </div>
@@ -580,15 +527,6 @@ your-repository/
                         <li>访问提供的URL查看您的网站</li>
                     </ol>
                 </div>
-            </div>
-            
-            <div class="debug-section">
-                <h3><i class="fas fa-bug"></i> 图片路径调试</h3>
-                <p>如果您仍然遇到图片显示问题，可以点击下面的按钮进行调试：</p>
-                <button class="debug-btn" id="checkPathsBtn">
-                    <i class="fas fa-search"></i> 检查图片路径
-                </button>
-                <div id="debugResults" style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px; display: none;"></div>
             </div>
         </div>
     </div>
@@ -621,10 +559,155 @@ your-repository/
     </div>
 
     <script>
+        // 配置
+        const USERNAME = 'xiaomayidechuanshuo';
+        const REPOSITORY = 'image-comparison';
+        const BRANCH = 'main';
+        const BASE_PATH = 'images';
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // 为每个对比项初始化滑块
+            // 开始检测图片组
+            detectImageGroups();
+            
+            // 调试功能
+            document.getElementById('debugBtn').addEventListener('click', function() {
+                alert('要使用您自己的图片，请将图片上传到GitHub仓库，然后按照00、01、02...的编号创建文件夹。\n\n每个文件夹包含before.png和after.png两张图片。');
+            });
+        });
+        
+        // 检测可用的图片组
+        async function detectImageGroups() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorContainer = document.getElementById('errorContainer');
+            const comparisonContainer = document.getElementById('comparisonContainer');
+            
+            let groupIndex = 0;
+            const availableGroups = [];
+            
+            // 最多检测100组
+            while (groupIndex < 100) {
+                const groupId = groupIndex.toString().padStart(2, '0');
+                const beforeUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPOSITORY}/${BRANCH}/${BASE_PATH}/${groupId}/before.png`;
+                const afterUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPOSITORY}/${BRANCH}/${BASE_PATH}/${groupId}/after.png`;
+                
+                loadingIndicator.innerHTML = `<i class="fas fa-spinner"></i> 正在检测图片组 ${groupId}...`;
+                
+                try {
+                    // 检查before.png是否存在
+                    const beforeExists = await checkImageExists(beforeUrl);
+                    
+                    if (beforeExists) {
+                        // 检查after.png是否存在
+                        const afterExists = await checkImageExists(afterUrl);
+                        
+                        if (afterExists) {
+                            availableGroups.push({
+                                id: groupId,
+                                before: beforeUrl,
+                                after: afterUrl
+                            });
+                            console.log(`检测到图片组 ${groupId}`);
+                        } else {
+                            console.warn(`图片组 ${groupId} 缺少after.png`);
+                            break;
+                        }
+                    } else {
+                        console.log(`未找到图片组 ${groupId}，停止检测`);
+                        break;
+                    }
+                } catch (error) {
+                    console.error(`检测图片组 ${groupId} 时出错:`, error);
+                    break;
+                }
+                
+                groupIndex++;
+            }
+            
+            // 隐藏加载指示器
+            loadingIndicator.style.display = 'none';
+            
+            if (availableGroups.length === 0) {
+                // 没有找到任何图片组
+                errorContainer.style.display = 'block';
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <h3><i class="fas fa-exclamation-circle"></i> 未找到图片组</h3>
+                        <p>未检测到任何图片组。请确保：</p>
+                        <ol>
+                            <li>您的GitHub仓库中有按照00、01、02编号的文件夹</li>
+                            <li>每个文件夹包含before.png和after.png两张图片</li>
+                            <li>图片已上传到正确的路径: ${BASE_PATH}/组号/图片名称.png</li>
+                        </ol>
+                        <p>当前检测的路径: <code>https://raw.githubusercontent.com/${USERNAME}/${REPOSITORY}/${BRANCH}/${BASE_PATH}/组号/before.png</code></p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 生成图片对比项
+            availableGroups.forEach(group => {
+                const comparisonItem = createComparisonItem(group);
+                comparisonContainer.appendChild(comparisonItem);
+            });
+            
+            // 初始化所有对比项
+            initAllSliders();
+        }
+        
+        // 检查图片是否存在
+        function checkImageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url + '?t=' + new Date().getTime(); // 添加时间戳避免缓存
+                
+                // 设置超时
+                setTimeout(() => resolve(false), 5000);
+            });
+        }
+        
+        // 创建对比项HTML
+        function createComparisonItem(group) {
+            const item = document.createElement('div');
+            item.className = 'comparison-item';
+            item.dataset.groupId = group.id;
+            
+            item.innerHTML = `
+                <div class="comparison-header">
+                    <div class="comparison-title">图片对比组 ${group.id}</div>
+                    <div class="comparison-controls">
+                        <button class="control-btn fullscreen-btn" title="全屏查看">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="image-comparison">
+                    <div class="image-container">
+                        <img class="image-after" src="${group.after}" alt="组 ${group.id} 后图片" onerror="handleImageError(this, 'after')">
+                        <div class="image-before">
+                            <img src="${group.before}" alt="组 ${group.id} 前图片" onerror="handleImageError(this, 'before')">
+                        </div>
+                        <div class="slider">
+                            <div class="slider-handle"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-input">
+                    <input type="range" min="0" max="100" value="50" class="slider-control">
+                </div>
+                <div class="image-caption">
+                    <span class="before-label">Before (组 ${group.id})</span>
+                    <span class="after-label">After (组 ${group.id})</span>
+                </div>
+            `;
+            
+            return item;
+        }
+        
+        // 初始化所有滑块
+        function initAllSliders() {
             const comparisonItems = document.querySelectorAll('.comparison-item');
-            let activeFullscreenItem = null;
             
             comparisonItems.forEach(item => {
                 initSlider(item);
@@ -635,254 +718,203 @@ your-repository/
                     openFullscreen(item);
                 });
             });
+        }
+        
+        // 初始化滑块功能
+        function initSlider(item) {
+            const slider = item.querySelector('.slider-control');
+            const beforeImage = item.querySelector('.image-before');
+            const sliderLine = item.querySelector('.slider');
+            const sliderHandle = item.querySelector('.slider-handle');
             
-            // 初始化滑块功能
-            function initSlider(item) {
-                const slider = item.querySelector('.slider-control');
-                const beforeImage = item.querySelector('.image-before');
-                const sliderLine = item.querySelector('.slider');
-                const sliderHandle = item.querySelector('.slider-handle');
-                
-                // 初始化
-                beforeImage.style.width = '50%';
-                sliderLine.style.left = '50%';
-                
-                // 滑块输入事件
-                slider.addEventListener('input', function(e) {
-                    const value = e.target.value;
-                    beforeImage.style.width = value + '%';
-                    sliderLine.style.left = value + '%';
-                });
-                
-                // 拖动滑块线事件
-                let isDragging = false;
-                
-                sliderHandle.addEventListener('mousedown', function(e) {
-                    isDragging = true;
-                    sliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                    e.preventDefault();
-                });
-                
-                document.addEventListener('mouseup', function() {
-                    isDragging = false;
-                    sliderHandle.style.transform = 'translate(-50%, -50%)';
-                });
-                
-                document.addEventListener('mousemove', function(e) {
-                    if (!isDragging) return;
-                    
-                    const container = item.querySelector('.image-comparison');
-                    const containerRect = container.getBoundingClientRect();
-                    const x = e.clientX - containerRect.left;
-                    const percentage = (x / containerRect.width) * 100;
-                    
-                    if (percentage >= 0 && percentage <= 100) {
-                        beforeImage.style.width = percentage + '%';
-                        sliderLine.style.left = percentage + '%';
-                        slider.value = percentage;
-                    }
-                });
-                
-                // 添加触摸事件支持
-                sliderHandle.addEventListener('touchstart', function(e) {
-                    isDragging = true;
-                    sliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                    e.preventDefault();
-                });
-                
-                document.addEventListener('touchend', function() {
-                    isDragging = false;
-                    sliderHandle.style.transform = 'translate(-50%, -50%)';
-                });
-                
-                document.addEventListener('touchmove', function(e) {
-                    if (!isDragging) return;
-                    
-                    const container = item.querySelector('.image-comparison');
-                    const containerRect = container.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const x = touch.clientX - containerRect.left;
-                    const percentage = (x / containerRect.width) * 100;
-                    
-                    if (percentage >= 0 && percentage <= 100) {
-                        beforeImage.style.width = percentage + '%';
-                        sliderLine.style.left = percentage + '%';
-                        slider.value = percentage;
-                    }
-                    
-                    e.preventDefault();
-                });
-            }
+            // 初始化
+            beforeImage.style.width = '50%';
+            sliderLine.style.left = '50%';
             
-            // 全屏功能
-            function openFullscreen(item) {
-                const fullscreenMode = document.querySelector('.fullscreen-mode');
-                const fullscreenAfter = fullscreenMode.querySelector('.image-after');
-                const fullscreenBefore = fullscreenMode.querySelector('.image-before img');
-                const fullscreenBeforeContainer = fullscreenMode.querySelector('.image-before');
-                const fullscreenSlider = fullscreenMode.querySelector('.slider-control');
-                const fullscreenSliderLine = fullscreenMode.querySelector('.slider');
-                const fullscreenSliderHandle = fullscreenMode.querySelector('.slider-handle');
-                const beforeLabel = fullscreenMode.querySelector('.before-label');
-                const afterLabel = fullscreenMode.querySelector('.after-label');
-                
-                // 获取原始图片和标签
-                const originalAfter = item.querySelector('.image-after');
-                const originalBefore = item.querySelector('.image-before img');
-                const originalBeforeLabel = item.querySelector('.before-label').textContent;
-                const originalAfterLabel = item.querySelector('.after-label').textContent;
-                
-                // 设置全屏内容
-                fullscreenAfter.src = originalAfter.src;
-                fullscreenAfter.alt = originalAfter.alt;
-                fullscreenBefore.src = originalBefore.src;
-                fullscreenBefore.alt = originalBefore.alt;
-                beforeLabel.textContent = originalBeforeLabel;
-                afterLabel.textContent = originalAfterLabel;
-                
-                // 初始化全屏滑块
-                fullscreenBeforeContainer.style.width = '50%';
-                fullscreenSliderLine.style.left = '50%';
-                fullscreenSlider.value = '50';
-                
-                // 显示全屏模式
-                fullscreenMode.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                
-                // 全屏滑块事件
-                fullscreenSlider.addEventListener('input', function(e) {
-                    const value = e.target.value;
-                    fullscreenBeforeContainer.style.width = value + '%';
-                    fullscreenSliderLine.style.left = value + '%';
-                });
-                
-                // 全屏拖动滑块线事件
-                let isFsDragging = false;
-                
-                fullscreenSliderHandle.addEventListener('mousedown', function(e) {
-                    isFsDragging = true;
-                    fullscreenSliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                    e.preventDefault();
-                });
-                
-                fullscreenMode.addEventListener('mouseup', function() {
-                    isFsDragging = false;
-                    fullscreenSliderHandle.style.transform = 'translate(-50%, -50%)';
-                });
-                
-                fullscreenMode.addEventListener('mousemove', function(e) {
-                    if (!isFsDragging) return;
-                    
-                    const container = fullscreenMode.querySelector('.image-comparison');
-                    const containerRect = container.getBoundingClientRect();
-                    const x = e.clientX - containerRect.left;
-                    const percentage = (x / containerRect.width) * 100;
-                    
-                    if (percentage >= 0 && percentage <= 100) {
-                        fullscreenBeforeContainer.style.width = percentage + '%';
-                        fullscreenSliderLine.style.left = percentage + '%';
-                        fullscreenSlider.value = percentage;
-                    }
-                });
-                
-                // 触摸事件支持
-                fullscreenSliderHandle.addEventListener('touchstart', function(e) {
-                    isFsDragging = true;
-                    fullscreenSliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                    e.preventDefault();
-                });
-                
-                fullscreenMode.addEventListener('touchend', function() {
-                    isFsDragging = false;
-                    fullscreenSliderHandle.style.transform = 'translate(-50%, -50%)';
-                });
-                
-                fullscreenMode.addEventListener('touchmove', function(e) {
-                    if (!isFsDragging) return;
-                    
-                    const container = fullscreenMode.querySelector('.image-comparison');
-                    const containerRect = container.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const x = touch.clientX - containerRect.left;
-                    const percentage = (x / containerRect.width) * 100;
-                    
-                    if (percentage >= 0 && percentage <= 100) {
-                        fullscreenBeforeContainer.style.width = percentage + '%';
-                        fullscreenSliderLine.style.left = percentage + '%';
-                        fullscreenSlider.value = percentage;
-                    }
-                    
-                    e.preventDefault();
-                });
-            }
-            
-            // 关闭全屏
-            document.querySelector('.close-fullscreen').addEventListener('click', function() {
-                const fullscreenMode = document.querySelector('.fullscreen-mode');
-                fullscreenMode.style.display = 'none';
-                document.body.style.overflow = 'auto';
+            // 滑块输入事件
+            slider.addEventListener('input', function(e) {
+                const value = e.target.value;
+                beforeImage.style.width = value + '%';
+                sliderLine.style.left = value + '%';
             });
             
-            // ESC键关闭全屏
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const fullscreenMode = document.querySelector('.fullscreen-mode');
-                    if (fullscreenMode.style.display === 'flex') {
-                        fullscreenMode.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                    }
+            // 拖动滑块线事件
+            let isDragging = false;
+            
+            sliderHandle.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                sliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                sliderHandle.style.transform = 'translate(-50%, -50%)';
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const container = item.querySelector('.image-comparison');
+                const containerRect = container.getBoundingClientRect();
+                const x = e.clientX - containerRect.left;
+                const percentage = (x / containerRect.width) * 100;
+                
+                if (percentage >= 0 && percentage <= 100) {
+                    beforeImage.style.width = percentage + '%';
+                    sliderLine.style.left = percentage + '%';
+                    slider.value = percentage;
                 }
             });
             
-            // 添加键盘控制
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    const activeSlider = document.querySelector('.slider-control:focus');
-                    if (activeSlider) {
-                        if (e.key === 'ArrowLeft') {
-                            activeSlider.value = Math.max(0, activeSlider.value - 5);
-                        } else if (e.key === 'ArrowRight') {
-                            activeSlider.value = Math.min(100, parseInt(activeSlider.value) + 5);
-                        }
-                        
-                        const event = new Event('input');
-                        activeSlider.dispatchEvent(event);
-                    }
+            // 添加触摸事件支持
+            sliderHandle.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                sliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+                sliderHandle.style.transform = 'translate(-50%, -50%)';
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                
+                const container = item.querySelector('.image-comparison');
+                const containerRect = container.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - containerRect.left;
+                const percentage = (x / containerRect.width) * 100;
+                
+                if (percentage >= 0 && percentage <= 100) {
+                    beforeImage.style.width = percentage + '%';
+                    sliderLine.style.left = percentage + '%';
+                    slider.value = percentage;
+                }
+                
+                e.preventDefault();
+            });
+        }
+        
+        // 全屏功能
+        function openFullscreen(item) {
+            const fullscreenMode = document.querySelector('.fullscreen-mode');
+            const fullscreenAfter = fullscreenMode.querySelector('.image-after');
+            const fullscreenBefore = fullscreenMode.querySelector('.image-before img');
+            const fullscreenBeforeContainer = fullscreenMode.querySelector('.image-before');
+            const fullscreenSlider = fullscreenMode.querySelector('.slider-control');
+            const fullscreenSliderLine = fullscreenMode.querySelector('.slider');
+            const fullscreenSliderHandle = fullscreenMode.querySelector('.slider-handle');
+            const beforeLabel = fullscreenMode.querySelector('.before-label');
+            const afterLabel = fullscreenMode.querySelector('.after-label');
+            
+            // 获取原始图片和标签
+            const originalAfter = item.querySelector('.image-after');
+            const originalBefore = item.querySelector('.image-before img');
+            const groupId = item.dataset.groupId;
+            
+            // 设置全屏内容
+            fullscreenAfter.src = originalAfter.src;
+            fullscreenAfter.alt = originalAfter.alt;
+            fullscreenBefore.src = originalBefore.src;
+            fullscreenBefore.alt = originalBefore.alt;
+            beforeLabel.textContent = `Before (组 ${groupId})`;
+            afterLabel.textContent = `After (组 ${groupId})`;
+            
+            // 初始化全屏滑块
+            fullscreenBeforeContainer.style.width = '50%';
+            fullscreenSliderLine.style.left = '50%';
+            fullscreenSlider.value = '50';
+            
+            // 显示全屏模式
+            fullscreenMode.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // 全屏滑块事件
+            fullscreenSlider.addEventListener('input', function(e) {
+                const value = e.target.value;
+                fullscreenBeforeContainer.style.width = value + '%';
+                fullscreenSliderLine.style.left = value + '%';
+            });
+            
+            // 全屏拖动滑块线事件
+            let isFsDragging = false;
+            
+            fullscreenSliderHandle.addEventListener('mousedown', function(e) {
+                isFsDragging = true;
+                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                e.preventDefault();
+            });
+            
+            fullscreenMode.addEventListener('mouseup', function() {
+                isFsDragging = false;
+                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%)';
+            });
+            
+            fullscreenMode.addEventListener('mousemove', function(e) {
+                if (!isFsDragging) return;
+                
+                const container = fullscreenMode.querySelector('.image-comparison');
+                const containerRect = container.getBoundingClientRect();
+                const x = e.clientX - containerRect.left;
+                const percentage = (x / containerRect.width) * 100;
+                
+                if (percentage >= 0 && percentage <= 100) {
+                    fullscreenBeforeContainer.style.width = percentage + '%';
+                    fullscreenSliderLine.style.left = percentage + '%';
+                    fullscreenSlider.value = percentage;
                 }
             });
             
-            // 调试功能
-            document.getElementById('debugBtn').addEventListener('click', function() {
-                alert('要使用您自己的图片，请将图片上传到GitHub仓库，然后更新HTML中的图片路径。\n\n参考FAQ部分的文件结构建议。');
+            // 触摸事件支持
+            fullscreenSliderHandle.addEventListener('touchstart', function(e) {
+                isFsDragging = true;
+                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                e.preventDefault();
             });
             
-            document.getElementById('checkPathsBtn').addEventListener('click', function() {
-                const debugResults = document.getElementById('debugResults');
-                debugResults.style.display = 'block';
-                debugResults.innerHTML = '<p>正在检查图片路径...</p>';
-                
-                setTimeout(function() {
-                    let results = '<h4>图片路径检查结果：</h4>';
-                    const images = document.querySelectorAll('img');
-                    
-                    images.forEach((img, index) => {
-                        const src = img.src;
-                        const isAbsolute = src.startsWith('http');
-                        
-                        results += `
-                            <div style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
-                                <p><strong>图片 ${index + 1}:</strong> ${img.alt}</p>
-                                <p>路径: ${src}</p>
-                                <p>类型: ${isAbsolute ? '绝对路径（外部图片）' : '相对路径'}</p>
-                                <p>状态: <span style="color: ${isAbsolute ? '#28a745' : '#dc3545'}">${isAbsolute ? '使用外部图片' : '请更改为您的图片路径'}</span></p>
-                            </div>
-                        `;
-                    });
-                    
-                    results += '<p style="margin-top: 15px;">提示：要将外部图片替换为您自己的图片，请使用相对路径（如: images/your-photo.jpg）</p>';
-                    debugResults.innerHTML = results;
-                }, 500);
+            fullscreenMode.addEventListener('touchend', function() {
+                isFsDragging = false;
+                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%)';
             });
+            
+            fullscreenMode.addEventListener('touchmove', function(e) {
+                if (!isFsDragging) return;
+                
+                const container = fullscreenMode.querySelector('.image-comparison');
+                const containerRect = container.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - containerRect.left;
+                const percentage = (x / containerRect.width) * 100;
+                
+                if (percentage >= 0 && percentage <= 100) {
+                    fullscreenBeforeContainer.style.width = percentage + '%';
+                    fullscreenSliderLine.style.left = percentage + '%';
+                    fullscreenSlider.value = percentage;
+                }
+                
+                e.preventDefault();
+            });
+        }
+        
+        // 关闭全屏
+        document.querySelector('.close-fullscreen').addEventListener('click', function() {
+            const fullscreenMode = document.querySelector('.fullscreen-mode');
+            fullscreenMode.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // ESC键关闭全屏
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const fullscreenMode = document.querySelector('.fullscreen-mode');
+                if (fullscreenMode.style.display === 'flex') {
+                    fullscreenMode.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
         });
         
         // 图片加载错误处理
