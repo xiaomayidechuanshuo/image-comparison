@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>增强版图片对比滑块 - 问题修复版</title>
+    <title>GitHub图片显示问题修复版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -43,6 +43,22 @@
         .description {
             color: #7f8c8d;
             margin-bottom: 20px;
+        }
+        
+        .alert {
+            background: #fff4e6;
+            border-left: 4px solid #ffa94d;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .alert h3 {
+            color: #e67700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .comparison-container {
@@ -356,6 +372,31 @@
             line-height: 1.5;
         }
         
+        .debug-section {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .debug-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .debug-btn:hover {
+            background: #c82333;
+        }
+        
         @media (max-width: 768px) {
             .comparison-item {
                 flex: 1 1 100%;
@@ -371,9 +412,23 @@
 <body>
     <div class="container">
         <header>
-            <h1>增强版图片对比滑块 - 问题修复版</h1>
-            <p class="description">已修复图片更新和全屏模式问题，支持PNG格式、放大功能和全屏查看</p>
+            <h1>GitHub图片显示问题修复版</h1>
+            <p class="description">已优化图片路径处理，解决GitHub Pages图片加载问题</p>
         </header>
+        
+        <div class="alert">
+            <h3><i class="fas fa-exclamation-triangle"></i> GitHub图片显示问题解决方案</h3>
+            <p>如果您的图片在GitHub上无法显示，请检查以下事项：</p>
+            <ol>
+                <li>确保图片已上传到您的GitHub仓库</li>
+                <li>使用正确的相对路径（如：<code>images/your-image.jpg</code>）</li>
+                <li>GitHub Pages可能需要几分钟才能更新内容</li>
+                <li>尝试在浏览器中按Ctrl+F5强制刷新</li>
+            </ol>
+            <button class="debug-btn" id="debugBtn">
+                <i class="fas fa-bug"></i> 调试图片路径
+            </button>
+        </div>
         
         <div class="comparison-container">
             <div class="comparison-item">
@@ -387,9 +442,9 @@
                 </div>
                 <div class="image-comparison">
                     <div class="image-container">
-                        <img class="image-after" src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80" alt="设计后">
+                        <img class="image-after" src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80" alt="设计后" onerror="handleImageError(this, 'after')">
                         <div class="image-before">
-                            <img src="https://images.unsplash.com/photo-1561070791-36c11767b26a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80" alt="设计前">
+                            <img src="https://images.unsplash.com/photo-1561070791-36c11767b26a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80" alt="设计前" onerror="handleImageError(this, 'before')">
                         </div>
                         <div class="slider">
                             <div class="slider-handle"></div>
@@ -416,9 +471,9 @@
                 </div>
                 <div class="image-comparison">
                     <div class="image-container">
-                        <img class="image-after" src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="新版界面">
+                        <img class="image-after" src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="新版界面" onerror="handleImageError(this, 'after')">
                         <div class="image-before">
-                            <img src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="旧版界面">
+                            <img src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="旧版界面" onerror="handleImageError(this, 'before')">
                         </div>
                         <div class="slider">
                             <div class="slider-handle"></div>
@@ -436,20 +491,20 @@
         </div>
         
         <div class="faq-section">
-            <h2>问题修复说明</h2>
+            <h2>GitHub图片显示问题解决方案</h2>
             
             <div class="faq-item">
                 <div class="faq-question">
                     <i class="fas fa-question-circle"></i>
-                    <span>图片不更新的问题解决方案</span>
+                    <span>GitHub Pages图片不显示的原因</span>
                 </div>
                 <div class="faq-answer">
-                    <p>图片不更新通常是由于浏览器缓存导致的。解决方法：</p>
+                    <p>GitHub Pages上图片不显示通常有以下原因：</p>
                     <ol>
-                        <li>在GitHub上更新图片后，等待几分钟让更改生效</li>
-                        <li>在浏览器中按Ctrl+F5强制刷新页面</li>
-                        <li>确保图片路径正确，如果您将HTML和图片放在根目录，路径应该是：<code>images/your-image.png</code></li>
-                        <li>可以在图片URL后添加随机参数来避免缓存：<code>images/your-image.png?v=2</code></li>
+                        <li><strong>路径问题</strong>：GitHub Pages的路径结构与本地不同，需要使用相对路径</li>
+                        <li><strong>缓存问题</strong>：浏览器或GitHub的CDN可能缓存了旧版本</li>
+                        <li><strong>大小写敏感</strong>：GitHub路径是大小写敏感的，确保路径大小写正确</li>
+                        <li><strong>文件未上传</strong>：图片可能未成功上传到GitHub仓库</li>
                     </ol>
                 </div>
             </div>
@@ -457,24 +512,12 @@
             <div class="faq-item">
                 <div class="faq-question">
                     <i class="fas fa-question-circle"></i>
-                    <span>全屏模式问题修复</span>
+                    <span>正确的文件结构和路径设置</span>
                 </div>
                 <div class="faq-answer">
-                    <p>已修复全屏模式下的显示和滑块拖动问题：</p>
-                    <ul>
-                        <li>重新设计了全屏模式的布局，确保图片正确显示</li>
-                        <li>修复了滑块拖动功能，现在在全屏模式下可以正常使用</li>
-                        <li>添加了适当的样式确保全屏模式下的元素尺寸正确</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="github-section">
-            <h2>GitHub文件结构建议</h2>
-            <p>为了确保图片正确加载，建议使用以下文件结构：</p>
-            
-            <div class="folder-structure">
+                    <p>为了确保图片正确加载，建议使用以下文件结构：</p>
+                    
+                    <div class="folder-structure">
 your-repository/
 ├── index.html
 ├── images/
@@ -485,12 +528,67 @@ your-repository/
 │       ├── before.jpg
 │       └── after.jpg
 └── README.md
-            </div>
-            
-            <p>在HTML中引用图片时，使用相对路径：</p>
-            <div class="folder-structure">
+                    </div>
+                    
+                    <p>在HTML中引用图片时，使用相对路径：</p>
+                    <div class="folder-structure">
 &lt;img class="image-after" src="images/design/after.png" alt="设计后"&gt;
 &lt;img src="images/design/before.png" alt="设计前"&gt;
+                    </div>
+                    
+                    <p>如果您的HTML文件在子文件夹中，需要调整路径：</p>
+                    <div class="folder-structure">
+&lt;img class="image-after" src="../images/design/after.png" alt="设计后"&gt;
+&lt;img src="../images/design/before.png" alt="设计前"&gt;
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <i class="fas fa-question-circle"></i>
+                    <span>解决缓存问题</span>
+                </div>
+                <div class="faq-answer">
+                    <p>如果图片已更新但浏览器仍显示旧图片，可以尝试以下方法：</p>
+                    <ol>
+                        <li>在GitHub上更新图片后，等待几分钟让更改生效</li>
+                        <li>在浏览器中按Ctrl+F5强制刷新页面</li>
+                        <li>可以在图片URL后添加随机参数来避免缓存：<code>images/your-image.png?v=2</code></li>
+                        <li>清除浏览器缓存</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="github-section">
+            <h2>GitHub Pages部署指南</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <i class="fas fa-question-circle"></i>
+                    <span>启用GitHub Pages</span>
+                </div>
+                <div class="faq-answer">
+                    <p>要将您的项目部署到GitHub Pages：</p>
+                    <ol>
+                        <li>将您的代码推送到GitHub仓库</li>
+                        <li>进入仓库的"Settings"页面</li>
+                        <li>在左侧菜单中选择"Pages"</li>
+                        <li>在"Source"部分选择部署分支（通常是main或master）</li>
+                        <li>点击Save，等待几分钟部署完成</li>
+                        <li>访问提供的URL查看您的网站</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h3><i class="fas fa-bug"></i> 图片路径调试</h3>
+                <p>如果您仍然遇到图片显示问题，可以点击下面的按钮进行调试：</p>
+                <button class="debug-btn" id="checkPathsBtn">
+                    <i class="fas fa-search"></i> 检查图片路径
+                </button>
+                <div id="debugResults" style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px; display: none;"></div>
             </div>
         </div>
     </div>
@@ -503,9 +601,9 @@ your-repository/
         <div class="fullscreen-content">
             <div class="fullscreen-comparison">
                 <div class="image-container">
-                    <img class="image-after" src="" alt="">
+                    <img class="image-after" src="" alt="" onerror="handleFullscreenImageError(this, 'after')">
                     <div class="image-before">
-                        <img src="" alt="">
+                        <img src="" alt="" onerror="handleFullscreenImageError(this, 'before')">
                     </div>
                     <div class="slider">
                         <div class="slider-handle"></div>
@@ -752,7 +850,63 @@ your-repository/
                     }
                 }
             });
+            
+            // 调试功能
+            document.getElementById('debugBtn').addEventListener('click', function() {
+                alert('要使用您自己的图片，请将图片上传到GitHub仓库，然后更新HTML中的图片路径。\n\n参考FAQ部分的文件结构建议。');
+            });
+            
+            document.getElementById('checkPathsBtn').addEventListener('click', function() {
+                const debugResults = document.getElementById('debugResults');
+                debugResults.style.display = 'block';
+                debugResults.innerHTML = '<p>正在检查图片路径...</p>';
+                
+                setTimeout(function() {
+                    let results = '<h4>图片路径检查结果：</h4>';
+                    const images = document.querySelectorAll('img');
+                    
+                    images.forEach((img, index) => {
+                        const src = img.src;
+                        const isAbsolute = src.startsWith('http');
+                        
+                        results += `
+                            <div style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                                <p><strong>图片 ${index + 1}:</strong> ${img.alt}</p>
+                                <p>路径: ${src}</p>
+                                <p>类型: ${isAbsolute ? '绝对路径（外部图片）' : '相对路径'}</p>
+                                <p>状态: <span style="color: ${isAbsolute ? '#28a745' : '#dc3545'}">${isAbsolute ? '使用外部图片' : '请更改为您的图片路径'}</span></p>
+                            </div>
+                        `;
+                    });
+                    
+                    results += '<p style="margin-top: 15px;">提示：要将外部图片替换为您自己的图片，请使用相对路径（如: images/your-photo.jpg）</p>';
+                    debugResults.innerHTML = results;
+                }, 500);
+            });
         });
+        
+        // 图片加载错误处理
+        function handleImageError(img, type) {
+            console.error(`图片加载失败: ${img.src}`);
+            img.parentNode.style.backgroundColor = '#ffcccc';
+            
+            if (type === 'before') {
+                img.alt = '图片加载失败 - 请检查路径';
+            } else {
+                img.alt = '图片加载失败 - 请检查路径';
+            }
+        }
+        
+        function handleFullscreenImageError(img, type) {
+            console.error(`全屏模式图片加载失败: ${img.src}`);
+            img.parentNode.style.backgroundColor = '#ffcccc';
+            
+            if (type === 'before') {
+                img.alt = '图片加载失败 - 请检查路径';
+            } else {
+                img.alt = '图片加载失败 - 请检查路径';
+            }
+        }
     </script>
 </body>
 </html>
