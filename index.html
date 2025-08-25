@@ -1,944 +1,192 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub图片对比查看器</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .description {
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-        
-        .alert {
-            background: #fff4e6;
-            border-left: 4px solid #ffa94d;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        
-        .alert h3 {
-            color: #e67700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .comparison-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .comparison-item {
-            flex: 1 1 calc(50% - 20px);
-            min-width: 300px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .comparison-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #3498db;
-            color: white;
-        }
-        
-        .comparison-title {
-            font-weight: 500;
-            font-size: 18px;
-        }
-        
-        .comparison-controls {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .control-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-        
-        .image-comparison {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .image-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 75%; /* 控制图片比例 */
-        }
-        
-        .image-before, .image-after {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #f8f9fa;
-        }
-        
-        .image-before {
-            width: 50%;
-            overflow: hidden;
-            z-index: 2;
-        }
-        
-        .slider {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 4px;
-            height: 100%;
-            background: white;
-            z-index: 3;
-            transform: translateX(-50%);
-            cursor: ew-resize;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-        }
-        
-        .slider-handle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            cursor: ew-resize;
-            transition: all 0.2s ease;
-        }
-        
-        .slider-handle:hover {
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
-            transform: translate(-50%, -50%) scale(1.05);
-        }
-        
-        .slider-handle::before, .slider-handle::after {
-            content: '';
-            position: absolute;
-            width: 12px;
-            height: 2px;
-            background: #3498db;
-        }
-        
-        .slider-handle::before {
-            transform: translateX(-4px);
-        }
-        
-        .slider-handle::after {
-            transform: translateX(4px);
-        }
-        
-        .slider-input {
-            padding: 15px;
-            background: #f8f9fa;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(to right, #3498db 0%, #3498db 50%, #ecf0f1 50%, #ecf0f1 100%);
-            border-radius: 10px;
-            outline: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #3498db;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            border: 2px solid white;
-        }
-        
-        .instructions {
-            text-align: center;
-            margin-top: 10px;
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        
-        .image-caption {
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            background: #f8f9fa;
-        }
-        
-        .before-label, .after-label {
-            padding: 5px 12px;
-            background: white;
-            border-radius: 15px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .before-label {
-            color: #e74c3c;
-        }
-        
-        .after-label {
-            color: #27ae60;
-        }
-        
-        .faq-section {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-        
-        .faq-section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        
-        .faq-item {
-            margin-bottom: 20px;
-        }
-        
-        .faq-question {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .faq-question i {
-            margin-right: 10px;
-            color: #3498db;
-        }
-        
-        .faq-answer {
-            color: #7f8c8d;
-            padding-left: 30px;
-        }
-        
-        /* 全屏样式 */
-        .fullscreen-mode {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 20px;
-        }
-        
-        .fullscreen-content {
-            width: 90%;
-            height: 80%;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .fullscreen-comparison {
-            width: 100%;
-            height: 100%;
-            max-width: 1000px;
-            position: relative;
-        }
-        
-        .fullscreen-comparison .image-container {
-            height: 100%;
-            padding-bottom: 0;
-        }
-        
-        .close-fullscreen {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            z-index: 1001;
-        }
-        
-        .github-section {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-top: 30px;
-        }
-        
-        .github-section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        
-        .folder-structure {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            margin: 15px 0;
-            font-family: 'Fira Code', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .debug-section {
-            background: #f8d7da;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            border-left: 4px solid #dc3545;
-        }
-        
-        .debug-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .debug-btn:hover {
-            background: #c82333;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 30px;
-            font-size: 18px;
-            color: #3498db;
-        }
-        
-        .loading i {
-            margin-right: 10px;
-            animation: spin 1s infinite linear;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-message {
-            background: #ffcccc;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            color: #d32f2f;
-        }
-        
-        @media (max-width: 768px) {
-            .comparison-item {
-                flex: 1 1 100%;
-            }
-            
-            .fullscreen-content {
-                width: 95%;
-                height: 70%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片对比查看器</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {box-sizing:border-box;margin:0;padding:0;}
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:#111;color:#eee;min-height:100vh;padding:20px;
+    }
+    .container {max-width:1200px;margin:0 auto;}
+    header {text-align:center;margin-bottom:20px;}
+    h1 {font-size:26px;color:#fff;}
+    .comparison-container {display:flex;flex-wrap:wrap;gap:20px;}
+    .comparison-item {
+      flex:1 1 calc(50% - 20px);min-width:300px;
+      border-radius:12px;overflow:hidden;background:#000;
+      position:relative;
+    }
+    .comparison-header {
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 15px;background:#222;color:#eee;
+    }
+    .image-comparison {position:relative;width:100%;overflow:hidden;}
+    .image-container {
+      position:relative;width:100%;height:0;padding-bottom:75%;
+    }
+    .image-container img {
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      object-fit:contain;background:#000;
+    }
+    .image-before {
+      clip-path: inset(0 50% 0 0); /* 初始显示左半部分 */
+      will-change: clip-path;
+    }
+    .slider {
+      position:absolute;top:0;left:50%;width:2px;height:100%;
+      background:rgba(255,255,255,0.7);cursor:ew-resize;z-index:3;
+    }
+    .slider-handle {
+      position:absolute;top:50%;left:50%;
+      width:28px;height:28px;border-radius:50%;
+      background:#fff;border:2px solid #3498db;
+      transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    }
+    .image-caption {
+      display:flex;justify-content:space-between;
+      padding:8px 12px;background:#222;color:#ccc;font-size:14px;
+    }
+    .before-label{color:#e74c3c;}
+    .after-label{color:#27ae60;}
+    /* 全屏模式 */
+    .fullscreen-mode {
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.95);z-index:1000;
+      display:none;justify-content:center;align-items:center;
+      flex-direction:column;
+    }
+    .fullscreen-content {width:95%;height:90%;position:relative;}
+    .fullscreen-comparison {width:100%;height:100%;position:relative;}
+    .fullscreen-comparison .image-container {height:100%;padding-bottom:0;}
+    .close-fullscreen {
+      position:absolute;top:20px;right:20px;
+      width:40px;height:40px;border:none;border-radius:50%;
+      background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;
+      font-size:20px;display:flex;align-items:center;justify-content:center;
+    }
+    @media(max-width:768px){.comparison-item{flex:1 1 100%;}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>GitHub图片对比查看器</h1>
-            <p class="description">动态加载GitHub仓库中的图片对比组</p>
-        </header>
-        
-        <div class="alert">
-            <h3><i class="fas fa-exclamation-triangle"></i> GitHub图片显示问题解决方案</h3>
-            <p>本页面使用raw.githubusercontent.com域名加载图片，确保GitHub Pages能正确显示图片。</p>
-            <p>图片路径格式: <code>https://raw.githubusercontent.com/用户名/仓库名/main/images/组号/before.png</code></p>
-            <button class="debug-btn" id="debugBtn">
-                <i class="fas fa-bug"></i> 调试图片路径
-            </button>
-        </div>
-        
-        <div id="loadingIndicator" class="loading">
-            <i class="fas fa-spinner"></i> 正在检测图片组，请稍候...
-        </div>
-        
-        <div id="errorContainer" style="display: none;"></div>
-        
-        <div class="comparison-container" id="comparisonContainer">
-            <!-- 动态生成的图片对比项将在这里显示 -->
-        </div>
-        
-        <div class="faq-section">
-            <h2>GitHub图片显示问题解决方案</h2>
-            
-            <div class="faq-item">
-                <div class="faq-question">
-                    <i class="fas fa-question-circle"></i>
-                    <span>GitHub Pages图片不显示的原因</span>
-                </div>
-                <div class="faq-answer">
-                    <p>GitHub Pages上图片不显示通常有以下原因：</p>
-                    <ol>
-                        <li><strong>路径问题</strong>：GitHub Pages的路径结构与本地不同，需要使用相对路径</li>
-                        <li><strong>缓存问题</strong>：浏览器或GitHub的CDN可能缓存了旧版本</li>
-                        <li><strong>大小写敏感</strong>：GitHub路径是大小写敏感的，确保路径大小写正确</li>
-                        <li><strong>文件未上传</strong>：图片可能未成功上传到GitHub仓库</li>
-                    </ol>
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question">
-                    <i class="fas fa-question-circle"></i>
-                    <span>正确的文件结构和路径设置</span>
-                </div>
-                <div class="faq-answer">
-                    <p>为了确保图片正确加载，建议使用以下文件结构：</p>
-                    
-                    <div class="folder-structure">
-your-repository/
-├── index.html
-├── images/
-│   ├── 00/
-│   │   ├── before.png
-│   │   └── after.png
-│   ├── 01/
-│   │   ├── before.png
-│   │   └── after.png
-│   └── 02/
-│       ├── before.png
-│       └── after.png
-└── README.md
-                    </div>
-                    
-                    <p>本页面会自动检测从00开始的图片组，直到找不到图片为止。</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="github-section">
-            <h2>GitHub Pages部署指南</h2>
-            
-            <div class="faq-item">
-                <div class="faq-question">
-                    <i class="fas fa-question-circle"></i>
-                    <span>启用GitHub Pages</span>
-                </div>
-                <div class="faq-answer">
-                    <p>要将您的项目部署到GitHub Pages：</p>
-                    <ol>
-                        <li>将您的代码推送到GitHub仓库</li>
-                        <li>进入仓库的"Settings"页面</li>
-                        <li>在左侧菜单中选择"Pages"</li>
-                        <li>在"Source"部分选择部署分支（通常是main或master）</li>
-                        <li>点击Save，等待几分钟部署完成</li>
-                        <li>访问提供的URL查看您的网站</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 全屏模式 -->
-    <div class="fullscreen-mode">
-        <button class="close-fullscreen">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="fullscreen-content">
-            <div class="fullscreen-comparison">
-                <div class="image-container">
-                    <img class="image-after" src="" alt="" onerror="handleFullscreenImageError(this, 'after')">
-                    <div class="image-before">
-                        <img src="" alt="" onerror="handleFullscreenImageError(this, 'before')">
-                    </div>
-                    <div class="slider">
-                        <div class="slider-handle"></div>
-                    </div>
-                </div>
-                <div class="slider-input">
-                    <input type="range" min="0" max="100" value="50" class="slider-control">
-                </div>
-                <div class="image-caption">
-                    <span class="before-label">Before</span>
-                    <span class="after-label">After</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container">
+  <header>
+    <h1>图片对比查看器</h1>
+  </header>
+  <div class="comparison-container" id="comparisonContainer"></div>
+</div>
 
-    <script>
-        // 配置
-        const USERNAME = 'xiaomayidechuanshuo';
-        const REPOSITORY = 'image-comparison';
-        const BRANCH = 'main';
-        const BASE_PATH = 'images';
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // 开始检测图片组
-            detectImageGroups();
-            
-            // 调试功能
-            document.getElementById('debugBtn').addEventListener('click', function() {
-                alert('要使用您自己的图片，请将图片上传到GitHub仓库，然后按照00、01、02...的编号创建文件夹。\n\n每个文件夹包含before.png和after.png两张图片。');
-            });
-        });
-        
-        // 检测可用的图片组
-        async function detectImageGroups() {
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const errorContainer = document.getElementById('errorContainer');
-            const comparisonContainer = document.getElementById('comparisonContainer');
-            
-            let groupIndex = 0;
-            const availableGroups = [];
-            
-            // 最多检测100组
-            while (groupIndex < 100) {
-                const groupId = groupIndex.toString().padStart(2, '0');
-                const beforeUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPOSITORY}/${BRANCH}/${BASE_PATH}/${groupId}/before.png`;
-                const afterUrl = `https://raw.githubusercontent.com/${USERNAME}/${REPOSITORY}/${BRANCH}/${BASE_PATH}/${groupId}/after.png`;
-                
-                loadingIndicator.innerHTML = `<i class="fas fa-spinner"></i> 正在检测图片组 ${groupId}...`;
-                
-                try {
-                    // 检查before.png是否存在
-                    const beforeExists = await checkImageExists(beforeUrl);
-                    
-                    if (beforeExists) {
-                        // 检查after.png是否存在
-                        const afterExists = await checkImageExists(afterUrl);
-                        
-                        if (afterExists) {
-                            availableGroups.push({
-                                id: groupId,
-                                before: beforeUrl,
-                                after: afterUrl
-                            });
-                            console.log(`检测到图片组 ${groupId}`);
-                        } else {
-                            console.warn(`图片组 ${groupId} 缺少after.png`);
-                            break;
-                        }
-                    } else {
-                        console.log(`未找到图片组 ${groupId}，停止检测`);
-                        break;
-                    }
-                } catch (error) {
-                    console.error(`检测图片组 ${groupId} 时出错:`, error);
-                    break;
-                }
-                
-                groupIndex++;
-            }
-            
-            // 隐藏加载指示器
-            loadingIndicator.style.display = 'none';
-            
-            if (availableGroups.length === 0) {
-                // 没有找到任何图片组
-                errorContainer.style.display = 'block';
-                errorContainer.innerHTML = `
-                    <div class="error-message">
-                        <h3><i class="fas fa-exclamation-circle"></i> 未找到图片组</h3>
-                        <p>未检测到任何图片组。请确保：</p>
-                        <ol>
-                            <li>您的GitHub仓库中有按照00、01、02编号的文件夹</li>
-                            <li>每个文件夹包含before.png和after.png两张图片</li>
-                            <li>图片已上传到正确的路径: ${BASE_PATH}/组号/图片名称.png</li>
-                        </ol>
-                        <p>当前检测的路径: <code>https://raw.githubusercontent.com/${USERNAME}/${REPOSITORY}/${BRANCH}/${BASE_PATH}/组号/before.png</code></p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // 生成图片对比项
-            availableGroups.forEach(group => {
-                const comparisonItem = createComparisonItem(group);
-                comparisonContainer.appendChild(comparisonItem);
-            });
-            
-            // 初始化所有对比项
-            initAllSliders();
-        }
-        
-        // 检查图片是否存在
-        function checkImageExists(url) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = url + '?t=' + new Date().getTime(); // 添加时间戳避免缓存
-                
-                // 设置超时
-                setTimeout(() => resolve(false), 5000);
-            });
-        }
-        
-        // 创建对比项HTML
-        function createComparisonItem(group) {
-            const item = document.createElement('div');
-            item.className = 'comparison-item';
-            item.dataset.groupId = group.id;
-            
-            item.innerHTML = `
-                <div class="comparison-header">
-                    <div class="comparison-title">图片对比组 ${group.id}</div>
-                    <div class="comparison-controls">
-                        <button class="control-btn fullscreen-btn" title="全屏查看">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="image-comparison">
-                    <div class="image-container">
-                        <img class="image-after" src="${group.after}" alt="组 ${group.id} 后图片" onerror="handleImageError(this, 'after')">
-                        <div class="image-before">
-                            <img src="${group.before}" alt="组 ${group.id} 前图片" onerror="handleImageError(this, 'before')">
-                        </div>
-                        <div class="slider">
-                            <div class="slider-handle"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-input">
-                    <input type="range" min="0" max="100" value="50" class="slider-control">
-                </div>
-                <div class="image-caption">
-                    <span class="before-label">Before (组 ${group.id})</span>
-                    <span class="after-label">After (组 ${group.id})</span>
-                </div>
-            `;
-            
-            return item;
-        }
-        
-        // 初始化所有滑块
-        function initAllSliders() {
-            const comparisonItems = document.querySelectorAll('.comparison-item');
-            
-            comparisonItems.forEach(item => {
-                initSlider(item);
-                
-                // 全屏功能
-                const fullscreenBtn = item.querySelector('.fullscreen-btn');
-                fullscreenBtn.addEventListener('click', function() {
-                    openFullscreen(item);
-                });
-            });
-        }
-        
-        // 初始化滑块功能
-        function initSlider(item) {
-            const slider = item.querySelector('.slider-control');
-            const beforeImage = item.querySelector('.image-before');
-            const sliderLine = item.querySelector('.slider');
-            const sliderHandle = item.querySelector('.slider-handle');
-            
-            // 初始化
-            beforeImage.style.width = '50%';
-            sliderLine.style.left = '50%';
-            
-            // 滑块输入事件
-            slider.addEventListener('input', function(e) {
-                const value = e.target.value;
-                beforeImage.style.width = value + '%';
-                sliderLine.style.left = value + '%';
-            });
-            
-            // 拖动滑块线事件
-            let isDragging = false;
-            
-            sliderHandle.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                sliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                e.preventDefault();
-            });
-            
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-                sliderHandle.style.transform = 'translate(-50%, -50%)';
-            });
-            
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-                
-                const container = item.querySelector('.image-comparison');
-                const containerRect = container.getBoundingClientRect();
-                const x = e.clientX - containerRect.left;
-                const percentage = (x / containerRect.width) * 100;
-                
-                if (percentage >= 0 && percentage <= 100) {
-                    beforeImage.style.width = percentage + '%';
-                    sliderLine.style.left = percentage + '%';
-                    slider.value = percentage;
-                }
-            });
-            
-            // 添加触摸事件支持
-            sliderHandle.addEventListener('touchstart', function(e) {
-                isDragging = true;
-                sliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchend', function() {
-                isDragging = false;
-                sliderHandle.style.transform = 'translate(-50%, -50%)';
-            });
-            
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                
-                const container = item.querySelector('.image-comparison');
-                const containerRect = container.getBoundingClientRect();
-                const touch = e.touches[0];
-                const x = touch.clientX - containerRect.left;
-                const percentage = (x / containerRect.width) * 100;
-                
-                if (percentage >= 0 && percentage <= 100) {
-                    beforeImage.style.width = percentage + '%';
-                    sliderLine.style.left = percentage + '%';
-                    slider.value = percentage;
-                }
-                
-                e.preventDefault();
-            });
-        }
-        
-        // 全屏功能
-        function openFullscreen(item) {
-            const fullscreenMode = document.querySelector('.fullscreen-mode');
-            const fullscreenAfter = fullscreenMode.querySelector('.image-after');
-            const fullscreenBefore = fullscreenMode.querySelector('.image-before img');
-            const fullscreenBeforeContainer = fullscreenMode.querySelector('.image-before');
-            const fullscreenSlider = fullscreenMode.querySelector('.slider-control');
-            const fullscreenSliderLine = fullscreenMode.querySelector('.slider');
-            const fullscreenSliderHandle = fullscreenMode.querySelector('.slider-handle');
-            const beforeLabel = fullscreenMode.querySelector('.before-label');
-            const afterLabel = fullscreenMode.querySelector('.after-label');
-            
-            // 获取原始图片和标签
-            const originalAfter = item.querySelector('.image-after');
-            const originalBefore = item.querySelector('.image-before img');
-            const groupId = item.dataset.groupId;
-            
-            // 设置全屏内容
-            fullscreenAfter.src = originalAfter.src;
-            fullscreenAfter.alt = originalAfter.alt;
-            fullscreenBefore.src = originalBefore.src;
-            fullscreenBefore.alt = originalBefore.alt;
-            beforeLabel.textContent = `Before (组 ${groupId})`;
-            afterLabel.textContent = `After (组 ${groupId})`;
-            
-            // 初始化全屏滑块
-            fullscreenBeforeContainer.style.width = '50%';
-            fullscreenSliderLine.style.left = '50%';
-            fullscreenSlider.value = '50';
-            
-            // 显示全屏模式
-            fullscreenMode.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            
-            // 全屏滑块事件
-            fullscreenSlider.addEventListener('input', function(e) {
-                const value = e.target.value;
-                fullscreenBeforeContainer.style.width = value + '%';
-                fullscreenSliderLine.style.left = value + '%';
-            });
-            
-            // 全屏拖动滑块线事件
-            let isFsDragging = false;
-            
-            fullscreenSliderHandle.addEventListener('mousedown', function(e) {
-                isFsDragging = true;
-                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                e.preventDefault();
-            });
-            
-            fullscreenMode.addEventListener('mouseup', function() {
-                isFsDragging = false;
-                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%)';
-            });
-            
-            fullscreenMode.addEventListener('mousemove', function(e) {
-                if (!isFsDragging) return;
-                
-                const container = fullscreenMode.querySelector('.image-comparison');
-                const containerRect = container.getBoundingClientRect();
-                const x = e.clientX - containerRect.left;
-                const percentage = (x / containerRect.width) * 100;
-                
-                if (percentage >= 0 && percentage <= 100) {
-                    fullscreenBeforeContainer.style.width = percentage + '%';
-                    fullscreenSliderLine.style.left = percentage + '%';
-                    fullscreenSlider.value = percentage;
-                }
-            });
-            
-            // 触摸事件支持
-            fullscreenSliderHandle.addEventListener('touchstart', function(e) {
-                isFsDragging = true;
-                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                e.preventDefault();
-            });
-            
-            fullscreenMode.addEventListener('touchend', function() {
-                isFsDragging = false;
-                fullscreenSliderHandle.style.transform = 'translate(-50%, -50%)';
-            });
-            
-            fullscreenMode.addEventListener('touchmove', function(e) {
-                if (!isFsDragging) return;
-                
-                const container = fullscreenMode.querySelector('.image-comparison');
-                const containerRect = container.getBoundingClientRect();
-                const touch = e.touches[0];
-                const x = touch.clientX - containerRect.left;
-                const percentage = (x / containerRect.width) * 100;
-                
-                if (percentage >= 0 && percentage <= 100) {
-                    fullscreenBeforeContainer.style.width = percentage + '%';
-                    fullscreenSliderLine.style.left = percentage + '%';
-                    fullscreenSlider.value = percentage;
-                }
-                
-                e.preventDefault();
-            });
-        }
-        
-        // 关闭全屏
-        document.querySelector('.close-fullscreen').addEventListener('click', function() {
-            const fullscreenMode = document.querySelector('.fullscreen-mode');
-            fullscreenMode.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-        
-        // ESC键关闭全屏
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const fullscreenMode = document.querySelector('.fullscreen-mode');
-                if (fullscreenMode.style.display === 'flex') {
-                    fullscreenMode.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            }
-        });
-        
-        // 图片加载错误处理
-        function handleImageError(img, type) {
-            console.error(`图片加载失败: ${img.src}`);
-            img.parentNode.style.backgroundColor = '#ffcccc';
-            
-            if (type === 'before') {
-                img.alt = '图片加载失败 - 请检查路径';
-            } else {
-                img.alt = '图片加载失败 - 请检查路径';
-            }
-        }
-        
-        function handleFullscreenImageError(img, type) {
-            console.error(`全屏模式图片加载失败: ${img.src}`);
-            img.parentNode.style.backgroundColor = '#ffcccc';
-            
-            if (type === 'before') {
-                img.alt = '图片加载失败 - 请检查路径';
-            } else {
-                img.alt = '图片加载失败 - 请检查路径';
-            }
-        }
-    </script>
+<!-- 全屏模式 -->
+<div class="fullscreen-mode" id="fullscreenMode">
+  <button class="close-fullscreen"><i class="fas fa-times"></i></button>
+  <div class="fullscreen-content">
+    <div class="fullscreen-comparison">
+      <div class="image-container">
+        <img class="image-after" src="" alt="">
+        <img class="image-before" src="" alt="">
+        <div class="slider"><div class="slider-handle"></div></div>
+      </div>
+      <div class="image-caption">
+        <span class="before-label">Before</span>
+        <span class="after-label">After</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const groups = [
+  {id:"00", before:"images/00/before.png", after:"images/00/after.png"},
+  {id:"01", before:"images/01/before.png", after:"images/01/after.png"}
+];
+
+function createComparisonItem(group){
+  const item=document.createElement("div");
+  item.className="comparison-item";item.dataset.groupId=group.id;
+  item.innerHTML=`
+    <div class="comparison-header">
+      <div>对比组 ${group.id}</div>
+      <button class="fullscreen-btn" title="全屏"><i class="fas fa-expand"></i></button>
+    </div>
+    <div class="image-comparison">
+      <div class="image-container">
+        <img class="image-after" src="${group.after}">
+        <img class="image-before" src="${group.before}">
+        <div class="slider"><div class="slider-handle"></div></div>
+      </div>
+    </div>
+    <div class="image-caption">
+      <span class="before-label">Before</span>
+      <span class="after-label">After</span>
+    </div>
+  `;
+  return item;
+}
+
+function initSlider(item){
+  const beforeImg=item.querySelector(".image-before");
+  const slider=item.querySelector(".slider");
+  const container=item.querySelector(".image-container");
+  let isDragging=false,percent=50,rafId=null;
+
+  function update(p){
+    beforeImg.style.clipPath=`inset(0 ${100-p}% 0 0)`;
+    slider.style.left=p+"%";
+  }
+  update(percent);
+
+  function moveHandler(x){
+    const rect=container.getBoundingClientRect();
+    let p=((x-rect.left)/rect.width)*100;
+    p=Math.max(0,Math.min(100,p));percent=p;
+    if(!rafId){
+      rafId=requestAnimationFrame(()=>{
+        update(percent);rafId=null;
+      });
+    }
+  }
+
+  slider.addEventListener("mousedown",e=>{isDragging=true;e.preventDefault();});
+  window.addEventListener("mouseup",()=>isDragging=false);
+  window.addEventListener("mousemove",e=>{if(isDragging)moveHandler(e.clientX);});
+
+  slider.addEventListener("touchstart",e=>{isDragging=true;e.preventDefault();});
+  window.addEventListener("touchend",()=>isDragging=false);
+  window.addEventListener("touchmove",e=>{if(isDragging)moveHandler(e.touches[0].clientX);});
+}
+
+function initAll(){
+  const container=document.getElementById("comparisonContainer");
+  groups.forEach(g=>{
+    const item=createComparisonItem(g);
+    container.appendChild(item);
+    initSlider(item);
+    item.querySelector(".fullscreen-btn").addEventListener("click",()=>openFullscreen(item));
+  });
+}
+
+function openFullscreen(item){
+  const fs=document.getElementById("fullscreenMode");
+  const before=fs.querySelector(".image-before");
+  const after=fs.querySelector(".image-after");
+  const originalBefore=item.querySelector(".image-before").src;
+  const originalAfter=item.querySelector(".image-after").src;
+  before.src=originalBefore;after.src=originalAfter;
+  fs.style.display="flex";document.body.style.overflow="hidden";
+  initSlider(fs);
+}
+document.querySelector(".close-fullscreen").addEventListener("click",()=>{
+  const fs=document.getElementById("fullscreenMode");
+  fs.style.display="none";document.body.style.overflow="auto";
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){document.querySelector(".close-fullscreen").click();}
+});
+
+initAll();
+</script>
 </body>
 </html>
