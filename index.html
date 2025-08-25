@@ -39,9 +39,16 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
+    .zoom-slider {
+      width: 100%;
+      margin-top: 10px;
+    }
+
     .image-container.zoomed {
-      transform: scale(2); /* 放大效果 */
+      transform: scale(1); /* 默认放大级别 */
       transform-origin: center;
+      transition: transform 0.3s ease;
     }
     
     @media(max-width:768px){.comparison-item{flex:1 1 100%;}}
@@ -66,16 +73,17 @@
         <span class="before-label">Before</span>
         <span class="after-label">After</span>
       </div>
+      <!-- 放大滑块会在点击放大按钮时显示 -->
     </div>
   </div>
 </div>
 
 <script>
+// 懒加载图片
 const MAX_GROUPS = 100;
 const FORMATS = ["png", "jpg", "webp"];
 const BASE_PATH = "images";
 
-// 检查图片是否存在
 function checkImageExists(url) {
   return new Promise(res => {
     const img = new Image();
@@ -86,7 +94,6 @@ function checkImageExists(url) {
   });
 }
 
-// 自动检测多组
 async function detectGroups() {
   const results = [];
   for (let i = 0; i < MAX_GROUPS; i++) {
@@ -108,7 +115,7 @@ async function detectGroups() {
   return results;
 }
 
-// 生成对比项
+// 创建图片对比项
 function createComparisonItem(group) {
   const item = document.createElement("div");
   item.className = "comparison-item";
@@ -121,8 +128,8 @@ function createComparisonItem(group) {
     </div>
     <div class="image-comparison">
       <div class="image-container">
-        <img class="image-after" src="${group.after}">
-        <img class="image-before" src="${group.before}">
+        <img class="image-after" src="${group.after}" loading="lazy">
+        <img class="image-before" src="${group.before}" loading="lazy">
         <div class="slider"><div class="slider-handle"></div></div>
       </div>
     </div>
@@ -132,16 +139,27 @@ function createComparisonItem(group) {
     </div>
   `;
   
-  // 放大功能
-  item.querySelector(".zoom-btn").addEventListener("click", () => toggleZoom(item));
-  
+  item.querySelector(".zoom-btn").addEventListener("click", () => {
+    const zoomSlider = document.createElement("input");
+    zoomSlider.type = "range";
+    zoomSlider.min = 1;
+    zoomSlider.max = 2;
+    zoomSlider.step = 0.1;
+    zoomSlider.value = 1;
+    zoomSlider.className = "zoom-slider";
+    item.appendChild(zoomSlider);
+    zoomSlider.addEventListener("input", (e) => {
+      adjustZoom(item, e.target.value);
+    });
+  });
+
   return item;
 }
 
 // 切换放大效果
-function toggleZoom(item) {
+function adjustZoom(item, scaleValue) {
   const imageContainer = item.querySelector(".image-container");
-  imageContainer.classList.toggle("zoomed");
+  imageContainer.style.transform = `scale(${scaleValue})`;
 }
 
 // 初始化滑块
@@ -173,7 +191,7 @@ function initSlider(item) {
   window.addEventListener("touchmove", e => { if (isDragging) moveHandler(e.touches[0].clientX); });
 }
 
-// 全屏功能
+// 全屏模式
 function openFullscreen(item) {
   const fs = document.getElementById("fullscreenMode");
   const before = fs.querySelector(".image-before");
@@ -181,20 +199,24 @@ function openFullscreen(item) {
   const originalBefore = item.querySelector(".image-before").src;
   const originalAfter = item.querySelector(".image-after").src;
   before.src = originalBefore; after.src = originalAfter;
+  
+  // 在全屏模式中初始化放大滑块
+  const zoomSlider = fs.querySelector(".zoom-slider");
+  if (!zoomSlider) {
+    const newZoomSlider = document.createElement("input");
+    newZoomSlider.type = "range";
+    newZoomSlider.min = 1;
+    newZoomSlider.max = 2;
+    newZoomSlider.step = 0.1;
+    newZoomSlider.value = 1;
+    newZoomSlider.className = "zoom-slider";
+    fs.querySelector(".fullscreen-comparison").appendChild(newZoomSlider);
+    newZoomSlider.addEventListener("input", (e) => {
+      adjustZoom(fs, e.target.value);
+    });
+  }
+  
   fs.style.display = "flex"; document.body.style.overflow = "hidden";
-  initSlider(fs);
-}
-
-// 初始化全部
-async function initAll() {
-  const container = document.getElementById("comparisonContainer");
-  const groups = await detectGroups();
-  groups.forEach(g => {
-    const item = createComparisonItem(g);
-    container.appendChild(item);
-    initSlider(item);
-    item.querySelector(".fullscreen-btn").addEventListener("click", () => openFullscreen(item));
-  });
 }
 
 document.querySelector(".close-fullscreen").addEventListener("click", () => {
