@@ -7,79 +7,36 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {box-sizing:border-box;margin:0;padding:0;}
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:#111;color:#eee;min-height:100vh;padding:20px;
-    }
+    body {font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background:#111;color:#eee;min-height:100vh;padding:20px;}
     .container {max-width:1200px;margin:0 auto;}
     header {text-align:center;margin-bottom:20px;}
     h1 {font-size:26px;color:#fff;}
     .comparison-container {display:flex;flex-wrap:wrap;gap:20px;}
-    .comparison-item {
-      flex:1 1 calc(50% - 20px);min-width:300px;
-      border-radius:12px;overflow:hidden;background:#000;
-      position:relative;
-    }
-    .comparison-header {
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 15px;background:#222;color:#eee;
-    }
+    .comparison-item {flex:1 1 calc(50% - 20px);min-width:300px;border-radius:12px;overflow:hidden;background:#000;position:relative;}
+    .comparison-header {display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#222;color:#eee;}
     .image-comparison {position:relative;width:100%;overflow:hidden;}
-    .image-container {
-      position:relative;width:100%;height:0;padding-bottom:75%;
-    }
-    .image-container img {
-      position:absolute;top:0;left:0;width:100%;height:100%;
-      object-fit:contain;background:#000;
-    }
-    .image-before {
-      clip-path: inset(0 50% 0 0); /* 初始显示左半部分 */
-      will-change: clip-path;
-    }
-    .slider {
-      position:absolute;top:0;left:50%;width:2px;height:100%;
-      background:rgba(255,255,255,0.7);cursor:ew-resize;z-index:3;
-    }
-    .slider-handle {
-      position:absolute;top:50%;left:50%;
-      width:28px;height:28px;border-radius:50%;
-      background:#fff;border:2px solid #3498db;
-      transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,0.3);
-    }
-    .image-caption {
-      display:flex;justify-content:space-between;
-      padding:8px 12px;background:#222;color:#ccc;font-size:14px;
-    }
+    .image-container {position:relative;width:100%;height:0;padding-bottom:75%;}
+    .image-container img {position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;background:#000;}
+    .image-before {clip-path:inset(0 50% 0 0);will-change:clip-path;}
+    .slider {position:absolute;top:0;left:50%;width:2px;height:100%;background:rgba(255,255,255,0.7);cursor:ew-resize;z-index:3;}
+    .slider-handle {position:absolute;top:50%;left:50%;width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid #3498db;transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+    .image-caption {display:flex;justify-content:space-between;padding:8px 12px;background:#222;color:#ccc;font-size:14px;}
     .before-label{color:#e74c3c;}
     .after-label{color:#27ae60;}
-    /* 全屏模式 */
-    .fullscreen-mode {
-      position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.95);z-index:1000;
-      display:none;justify-content:center;align-items:center;
-      flex-direction:column;
-    }
+    .fullscreen-mode {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:1000;display:none;justify-content:center;align-items:center;flex-direction:column;}
     .fullscreen-content {width:95%;height:90%;position:relative;}
     .fullscreen-comparison {width:100%;height:100%;position:relative;}
     .fullscreen-comparison .image-container {height:100%;padding-bottom:0;}
-    .close-fullscreen {
-      position:absolute;top:20px;right:20px;
-      width:40px;height:40px;border:none;border-radius:50%;
-      background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;
-      font-size:20px;display:flex;align-items:center;justify-content:center;
-    }
+    .close-fullscreen {position:absolute;top:20px;right:20px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;}
     @media(max-width:768px){.comparison-item{flex:1 1 100%;}}
   </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <h1>图片对比查看器</h1>
-  </header>
+  <header><h1>图片对比查看器</h1></header>
   <div class="comparison-container" id="comparisonContainer"></div>
 </div>
 
-<!-- 全屏模式 -->
 <div class="fullscreen-mode" id="fullscreenMode">
   <button class="close-fullscreen"><i class="fas fa-times"></i></button>
   <div class="fullscreen-content">
@@ -98,11 +55,44 @@
 </div>
 
 <script>
-const groups = [
-  {id:"00", before:"images/00/before.png", after:"images/00/after.png"},
-  {id:"01", before:"images/01/before.png", after:"images/01/after.png"}
-];
+const MAX_GROUPS=100;
+const FORMATS=["png","jpg","webp"];
+const BASE_PATH="images";
 
+// 检查图片是否存在
+function checkImageExists(url){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>res(true);
+    img.onerror=()=>res(false);
+    img.src=url+"?t="+Date.now();
+    setTimeout(()=>res(false),3000);
+  });
+}
+
+// 自动检测多组
+async function detectGroups(){
+  const results=[];
+  for(let i=0;i<MAX_GROUPS;i++){
+    const id=i.toString().padStart(2,"0");
+    let beforeUrl=null,afterUrl=null;
+    for(const ext of FORMATS){
+      const b=`${BASE_PATH}/${id}/before.${ext}`;
+      const a=`${BASE_PATH}/${id}/after.${ext}`;
+      const be=await checkImageExists(b);
+      const ae=await checkImageExists(a);
+      if(be && ae){beforeUrl=b;afterUrl=a;break;}
+    }
+    if(beforeUrl && afterUrl){
+      results.push({id,before:beforeUrl,after:afterUrl});
+    }else{
+      break; // 停止在第一个缺失的组
+    }
+  }
+  return results;
+}
+
+// 生成对比项
 function createComparisonItem(group){
   const item=document.createElement("div");
   item.className="comparison-item";item.dataset.groupId=group.id;
@@ -126,6 +116,7 @@ function createComparisonItem(group){
   return item;
 }
 
+// 初始化滑块
 function initSlider(item){
   const beforeImg=item.querySelector(".image-before");
   const slider=item.querySelector(".slider");
@@ -143,31 +134,18 @@ function initSlider(item){
     let p=((x-rect.left)/rect.width)*100;
     p=Math.max(0,Math.min(100,p));percent=p;
     if(!rafId){
-      rafId=requestAnimationFrame(()=>{
-        update(percent);rafId=null;
-      });
+      rafId=requestAnimationFrame(()=>{update(percent);rafId=null;});
     }
   }
-
   slider.addEventListener("mousedown",e=>{isDragging=true;e.preventDefault();});
   window.addEventListener("mouseup",()=>isDragging=false);
   window.addEventListener("mousemove",e=>{if(isDragging)moveHandler(e.clientX);});
-
   slider.addEventListener("touchstart",e=>{isDragging=true;e.preventDefault();});
   window.addEventListener("touchend",()=>isDragging=false);
   window.addEventListener("touchmove",e=>{if(isDragging)moveHandler(e.touches[0].clientX);});
 }
 
-function initAll(){
-  const container=document.getElementById("comparisonContainer");
-  groups.forEach(g=>{
-    const item=createComparisonItem(g);
-    container.appendChild(item);
-    initSlider(item);
-    item.querySelector(".fullscreen-btn").addEventListener("click",()=>openFullscreen(item));
-  });
-}
-
+// 全屏
 function openFullscreen(item){
   const fs=document.getElementById("fullscreenMode");
   const before=fs.querySelector(".image-before");
@@ -178,6 +156,20 @@ function openFullscreen(item){
   fs.style.display="flex";document.body.style.overflow="hidden";
   initSlider(fs);
 }
+
+// 初始化全部
+async function initAll(){
+  const container=document.getElementById("comparisonContainer");
+  const groups=await detectGroups();
+  groups.forEach(g=>{
+    const item=createComparisonItem(g);
+    container.appendChild(item);
+    initSlider(item);
+    item.querySelector(".fullscreen-btn")
+      .addEventListener("click",()=>openFullscreen(item));
+  });
+}
+
 document.querySelector(".close-fullscreen").addEventListener("click",()=>{
   const fs=document.getElementById("fullscreenMode");
   fs.style.display="none";document.body.style.overflow="auto";
